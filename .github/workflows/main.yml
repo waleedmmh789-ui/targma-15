@@ -46,19 +46,20 @@ jobs:
       - name: Accept Android SDK licenses
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
 
-      # Gradle يُثبَّت هنا، فلا حاجة لملف gradlew
+      # الكاش معطّل: يمنع بقاء نتيجة "غير موجود" قديمة تُفشل تحميل إضافة KSP
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.9"
+          cache-disabled: true
 
       - name: Build Debug APK
         working-directory: ${{ steps.loc.outputs.dir }}
         run: |
           if [ -f ./gradlew ]; then
             chmod +x ./gradlew
-            ./gradlew :app:assembleDebug --no-daemon --stacktrace
+            ./gradlew :app:assembleDebug --no-daemon --stacktrace --refresh-dependencies
           else
-            gradle :app:assembleDebug --no-daemon --stacktrace
+            gradle :app:assembleDebug --no-daemon --stacktrace --refresh-dependencies
           fi
 
       - name: Upload Debug APK
@@ -66,4 +67,3 @@ jobs:
         with:
           name: app-debug-apk
           path: ${{ steps.loc.outputs.dir }}/app/build/outputs/apk/debug/*.apk
-          
